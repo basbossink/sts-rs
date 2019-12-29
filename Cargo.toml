@@ -1,0 +1,16 @@
+[package]
+name = "sts-rs"
+version = "0.1.0"
+authors = ["Bas Bossink <bas.bossink@gmail.com>"]
+edition = "2018"
+description = "Simple Time Series in Rust, a very simple way to record time-series data and serve graphs of that data."
+repository = "https://github.com/basbossink/sts-rs"
+keywords = ["time-series"]
+categories = ["visualization"]
+license = "BSD-2-Clause"
+
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
