@@ -2,6 +2,7 @@ extern crate actix;
 extern crate actix_web;
 extern crate chrono;
 extern crate csv;
+extern crate dirs;
 extern crate serde;
 
 use actix::prelude::*;
@@ -13,6 +14,7 @@ use std::clone::Clone;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::{self, Write};
+use std::path::PathBuf;
 use std::process::Command;
 use std::sync::Mutex;
 
@@ -22,6 +24,11 @@ set xdata time;
 set xtics rotate;
 set terminal svg;
 set xlabel 'Time';
+set key off;
+set datafile separator ",";
+set autoscale;
+set offsets 0.0, 0.0, 0.01, 0.01;
+set grid;
 set output"#;
 
 #[derive(Deserialize, Serialize, Copy, Debug, Clone)]
@@ -30,8 +37,19 @@ struct Datum {
     value: f64,
 }
 
-#[derive(Default)]
-struct BackgroundActor;
+struct BackgroundActor {
+    data_storage_path: PathBuf,
+    image_output_path: PathBuf,
+}
+
+impl BackgroundActor {
+    pub fn new(data_storage_path: PathBuf, image_output_path: PathBuf) -> BackgroundActor {
+        BackgroundActor {
+            data_storage_path,
+            image_output_path,
+        }
+    }
+}
 
 struct WriteCsv {
     series_name: String,
@@ -46,6 +64,46 @@ impl Actor for BackgroundActor {
     type Context = Context<Self>;
 }
 
+fn append_last_datum(file_name: &PathBuf, data: &Vec<Datum>) {
+    let mut options = OpenOptions::new();
+    let file = options
+        .write(true)
+        .create(true)
+        .append(true)
+        .open(file_name)
+        .unwrap();
+    let mut wtr = csv::WriterBuilder::new()
+        .has_headers(false)
+        .from_writer(file);
+    if let Some(datum) = data.last() {
+        wtr.serialize(datum).unwrap();
+    }
+    wtr.flush().unwrap();
+}
+
+fn generate_plot(series_name: &str, data_file_name: &PathBuf, images_directory: &PathBuf) {
+    let full_command = format!(
+        r#"{} '{}';
+set title '{} over time';
+set ylabel '{}';
+plot '{}' using 1:2 with lines notitle;"#,
+        GNUPLOT_COMMANDS,
+        images_directory
+            .join(format!("{}.svg", series_name))
+            .display(),
+        series_name,
+        series_name,
+        data_file_name.display()
+    );
+    let output = Command::new("gnuplot")
+        .args(&["-e", &full_command])
+        .output()
+        .expect("failed to execute process");
+    println!("Gnuplot command status {}", output.status);
+    io::stdout().write_all(&output.stdout).unwrap();
+    io::stderr().write_all(&output.stderr).unwrap();
+}
+
 impl Handler<WriteCsv> for BackgroundActor {
     type Result = ();
     fn handle(&mut self, msg: WriteCsv, _ctx: &mut Context<Self>) -> Self::Result {
@@ -54,40 +112,11 @@ impl Handler<WriteCsv> for BackgroundActor {
             msg.series_name,
             msg.data.len()
         );
-        let file_name = format!("data_{}.csv", msg.series_name);
-        let mut options = OpenOptions::new();
-        let file = options
-            .write(true)
-            .create(true)
-            .append(true)
-            .open(&file_name)
-            .unwrap();
-        let mut wtr = csv::WriterBuilder::new()
-            .has_headers(false)
-            .from_writer(file);
-        if let Some(datum) = msg.data.last() {
-            wtr.serialize(datum).unwrap();
-        }
-        wtr.flush().unwrap();
-        let full_command = format!(
-            r#"{} 'plot_{}_{}.svg';
-set title '{} over time';
-set ylabel '{}';
-plot '{}' using 1:0 with lines"#,
-            GNUPLOT_COMMANDS,
-            msg.series_name,
-            msg.data.len(),
-            msg.series_name,
-            msg.series_name,
-            &file_name
-        );
-        let output = Command::new("gnuplot")
-            .args(&["-e", &full_command])
-            .output()
-            .expect("failed to execute process");
-        println!("Gnuplot command status {}", output.status);
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
+        let file_name = self
+            .data_storage_path
+            .join(format!("data_{}.csv", msg.series_name));
+        append_last_datum(&file_name, &msg.data);
+        generate_plot(&msg.series_name, &file_name, &self.image_output_path);
     }
 }
 
@@ -139,9 +168,41 @@ async fn add_datum(
     ))
 }
 
+fn env_or_default(key: &str, default: &str) -> String {
+    match std::env::var(key) {
+        Ok(val) => val,
+        _ => default.to_owned(),
+    }
+}
+
+fn data_dir_or_empty() -> PathBuf {
+    match dirs::data_dir() {
+        Some(path) => path,
+        None => PathBuf::new(),
+    }
+}
+fn ensure_dir(directory: &PathBuf) {
+    if !directory.exists() {
+        std::fs::create_dir_all(directory.as_path()).unwrap();
+    }
+}
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    let bt_actor = BackgroundActor {}.start();
+    let config_dir = data_dir_or_empty().join(".sts-rs");
+    let data_output_path = PathBuf::from(env_or_default(
+        "STS_RS_DATA_PATH",
+        config_dir.join("data").to_str().unwrap(),
+    ));
+    let image_output_path = PathBuf::from(env_or_default(
+        "STS_RS_IMAGE_PATH",
+        config_dir.join("images").to_str().unwrap(),
+    ));
+    ensure_dir(&data_output_path);
+    ensure_dir(&image_output_path);
+    println!("Using data directory {}", data_output_path.display());
+    println!("Using image directory {}", image_output_path.display());
+
+    let bt_actor = BackgroundActor::new(data_output_path, image_output_path).start();
     let state = web::Data::new(AppState {
         background_actor: bt_actor.clone(),
         series: Mutex::new(HashMap::new()),
