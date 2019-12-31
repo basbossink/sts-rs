@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="static/style.css" type="text/css" media="screen" />
+    <link rel="apple-touch-icon" sizes="180x180" href="static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="static/favicon-16x16.png">
+    <link rel="manifest" href="static/site.webmanifest">
+    <title>Performance graphs</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <h1>A graphical overview of gathered performance metrics</h1>
+    <ul>
+      {% for serie in series %}
+      <li>
+        <h3>Parameter: {{ serie.name|e }}</h3>
+        <ul>
+          <li>Last modified: {{ serie.last_modified|e }}</li>
+          <li>Contains {{ serie.number_of_observations}} observations</li>
+        </ul>
+        <div><img src="images/{{serie.name}}.svg" /></div>
+      </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>
