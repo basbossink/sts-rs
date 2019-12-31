@@ -1,0 +1,12 @@
+{
+  "name": "perf-data-extractor",
+  "version": "1.0.0",
+  "description": "Project to extract web site performance data using puppeteer",
+  "main": "index.js",
+  "author": "Bas Bossink",
+  "license": "BSD-2-Clause",
+  "private": false,
+  "dependencies": {
+    "puppeteer": "^2.0.0"
+  }
+}
