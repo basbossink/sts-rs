@@ -1,3 +1,5 @@
+const axios = require("axios");
+const https = require('https');
 const puppeteer = require('puppeteer');
 
 (async () => {
@@ -6,9 +8,10 @@ const puppeteer = require('puppeteer');
     headless: true
   });
   const page = await browser.newPage();
-  await page.goto('https://localhost:8443');
-  let page_metrics = await page.metrics();
-  console.log("page metrics", page_metrics);
+  const baseUrl = 'https://localhost:8443';
+  console.log("Gathering performance metrics for", baseUrl);
+  await page.goto(baseUrl);
+  let pageMetrics = await page.metrics();
   const performanceTiming = JSON.parse(
     await page.evaluate(() => JSON.stringify(window.performance.timing))
   );
@@ -16,22 +19,36 @@ const puppeteer = require('puppeteer');
     await page.evaluate(() => JSON.stringify(window.performance.getEntries()))
   );
   const resource_entries = performanceEntries.filter(e => e.entryType === 'resource' || e.entryType === 'navigation');
-  const size_metrics = {
-    no_resources: page_metrics.Documents,
-    transfer_size: resource_entries.reduce((acc, curr) => acc + curr.transferSize, 0),
-    encoded_body_size: resource_entries.reduce((acc, curr) => acc + curr.encodedBodySize, 0),
-    decoded_body_size: resource_entries.reduce((acc, curr) => acc + curr.decodedBodySize, 0),
+  const metrics = {
+    numberOfResources: pageMetrics.Documents,
+    transferSize: resource_entries.reduce((acc, curr) => acc + curr.transferSize, 0),
+    encodedBodySize: resource_entries.reduce((acc, curr) => acc + curr.encodedBodySize, 0),
+    decodedBodySize: resource_entries.reduce((acc, curr) => acc + curr.decodedBodySize, 0),
+    backendTime: performanceTiming.responseStart - performanceTiming.navigationStart,
+    timeToFirstByte: performanceTiming.loadEventStart - performanceTiming.navigationStart,
+    timeToStartRender: performanceTiming.domLoading - performanceTiming.navigationStart,
+    timeToInteractive: performanceTiming.domInteractive - performanceTiming.navigationStart,
+    resourceDownloadTime: performanceTiming.responseEnd - performanceTiming.requestStart,
+    dnsLookupTime: performanceTiming.domainLookupEnd -performanceTiming.domainLookupStart
   }
-  const perf_timings = {
-    backend_time: performanceTiming.responseStart - performanceTiming.navigationStart,
-    time_to_first_byte: performanceTiming.loadEventStart - performanceTiming.navigationStart,
-    time_to_start_render: performanceTiming.domLoading - performanceTiming.navigationStart,
-    time_to_interactive: performanceTiming.domInteractive - performanceTiming.navigationStart,
-    resource_download_time: performanceTiming.responseEnd - performanceTiming.requestStart,
-    dns_lookup_time: performanceTiming.domainLookupEnd -performanceTiming.domainLookupStart
-  };
-  console.log("raw timing ", performanceTiming);
-  console.log("calulated metrics ", perf_timings);
-  console.log("size_metrics", size_metrics);
+  let currentTime = Math.floor(Date.now() / 1000);
   await browser.close();
+  console.log("Using", baseUrl, "as base URL for publishing metrics.");
+  console.log("Sending metrics:", metrics);
+  const instance = axios.create({
+    httpsAgent: new https.Agent({
+      rejectUnauthorized: false
+    })
+  });
+  for (const metric in metrics) {
+    if (metrics.hasOwnProperty(metric)) {
+      let url = baseUrl + '/' + metric;
+      let data = {
+        timeStamp: currentTime,
+        value: metrics[metric]
+      };
+      let response = await instance.post(url, data);
+      console.log("Recieved acknowledgement:", response.data);
+    }
+  }
 })();

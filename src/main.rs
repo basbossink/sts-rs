@@ -50,8 +50,9 @@ struct AvailableSeries<'a> {
 }
 
 #[derive(Deserialize, Serialize, Copy, Debug, Clone)]
+#[allow(non_snake_case)]
 struct Datum {
-    time_stamp: i64,
+    timeStamp: i64,
     value: f64,
 }
 
@@ -197,7 +198,7 @@ async fn add_datum(
     info: web::Json<Datum>,
     state: web::Data<AppState>,
 ) -> Result<String> {
-    let dt = Utc.timestamp(info.time_stamp, 0);
+    let dt = Utc.timestamp(info.timeStamp, 0);
     let series_name = path.to_string();
     let mut w = state.series.lock().unwrap();
     let current_values = if let Some(series) = w.get_mut(&series_name) {
@@ -293,7 +294,10 @@ fn read_csv_data(file_path: &Path) -> (Vec<Datum>, i64) {
             if last_modified < time_stamp {
                 last_modified = time_stamp;
             }
-            Datum { time_stamp, value }
+            Datum {
+                timeStamp: time_stamp,
+                value,
+            }
         })
         .collect();
     (data, last_modified)
