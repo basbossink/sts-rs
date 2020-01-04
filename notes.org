@@ -1,0 +1,11 @@
+#+title: Notes
+* Todos
+- [ ] Perf-data-extractor [0/3]
+  - [ ] Add proper logging
+  - [ ] Take inspection and post url as parameters/environment variables
+  - [ ] Add repeated execution for jitter robustness
+- [ ] Frontend [0/2]
+  - [ ] use seperate divs for description of metric and graph
+  - [ ] improve layout/styling
+- [ ] Backend [0/1]
+  - [ ] Add possibility to add description to metric
