@@ -1,7 +1,24 @@
 const axios = require('axios');
+const commandLineArgs = require('command-line-args');
+const commandLineUsage = require('command-line-usage');
 const consola = require('consola');
 const https = require('https');
 const puppeteer = require('puppeteer');
+
+/**
+ * This function validates if the given string can be parsed as URL.
+ * @param {String} candidateUrl - The string to validate.
+ * @return {Boolean} true if the string can successfully be parsed by the
+ * URL class, false otherwise.
+ */
+function isValidUrl(candidateUrl) {
+  try {
+    new URL(candidateUrl);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 
 /**
  * An object combining the raw metrics available from puppeteer and the browser.
@@ -26,7 +43,7 @@ async function gatherRawMetrics(browser, url) {
   await page.goto(url);
   const pageMetrics = await page.metrics();
   const performanceEntries = JSON.parse(
-      await page.evaluate(() => JSON.stringify(window.performance.getEntries())),
+    await page.evaluate(() => JSON.stringify(window.performance.getEntries())),
   );
   await page.close();
   return {pageMetrics, performanceEntries};
@@ -92,21 +109,77 @@ async function postMetrics(client, baseUrl, metrics, currentTime) {
   consola.success('Sent metrics to:', baseUrl);
 }
 
-(async () => {
-  const browser = await puppeteer.launch({
-    ignoreHTTPSErrors: true,
-    headless: true,
-  });
+const helpOptionAlias = 'h';
+const helpOptionName = 'help';
+const stsRsHostOptionAlias = 's';
+const stsRsHostOptionName = 'sts-rs-host';
+const targetOptionAlias = 't';
+const targetOptionName = 'target';
 
-  const client = axios.create({
-    httpsAgent: new https.Agent({
-      rejectUnauthorized: false,
-    }),
-  });
+const optionDefinitions = [
+  {name: targetOptionName, alias: targetOptionAlias},
+  {name: stsRsHostOptionName, alias: stsRsHostOptionAlias},
+  {name: helpOptionName, alias: helpOptionAlias},
+];
 
-  const baseUrl = 'https://localhost:8443';
-  const metrics = calculateMeasurements(await gatherRawMetrics(browser, baseUrl));
-  const currentTime = Math.floor(Date.now() / 1000);
-  await browser.close();
-  await postMetrics(client, baseUrl, metrics, currentTime);
+const options = commandLineArgs(optionDefinitions);
+
+(() => {
+  if (!options.hasOwnProperty(targetOptionName) ||
+     !isValidUrl(options[targetOptionName]) ||
+     !options.hasOwnProperty(stsRsHostOptionName) ||
+     !isValidUrl(options[stsRsHostOptionName]) ||
+     options[helpOptionName]) {
+    const sections = [
+      {
+        header: 'This application gathers performance metrics and posts them to an sts-rs end-point.',
+        content: 'This application is intended to be used together with an sts-rs {italic backend} it ' +
+          'visits a URL and posts some calculated performance metrics to the sts-rs end-point provided.',
+      },
+      {
+        header: 'Options',
+        optionList: [
+          {
+            name: targetOptionName,
+            alias: targetOptionAlias,
+            typeLabel: '{underline URL}',
+            description: 'The page to visit such that its performance characteristics can be measured.',
+          },
+          {
+            name: stsRsHostOptionName,
+            alias: stsRsHostOptionAlias,
+            typeLabel: '{underline URL}',
+            description: 'The URL for the sts-r backend server to which the performance results will be ' +
+              'published.',
+          },
+          {
+            name: helpOptionName,
+            alias: helpOptionAlias,
+            description: 'Print this usage guide.',
+            type: Boolean,
+          },
+        ],
+      },
+    ];
+    const usage = commandLineUsage(sections);
+    console.log(usage);
+  } else {
+    (async () => {
+      const browser = await puppeteer.launch({
+        ignoreHTTPSErrors: true,
+        headless: true,
+      });
+
+      const client = axios.create({
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+      });
+
+      const metrics = calculateMeasurements(await gatherRawMetrics(browser, options[targetOptionName]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      await browser.close();
+      await postMetrics(client, options[stsRsHostOptionName], metrics, currentTime);
+    })();
+  }
 })();
