@@ -1,38 +1,30 @@
 html, body {
-    width: 100%;
-    height: 100%;
-    background: wheat;
     font-family: sans-serif;
 }
 
 #page-wrapper {
-    height: 100%;
-    position: relative;
-    padding-top: 160px;
+    width: 100%;
+    display: flex;
 }
 
 #series-list {
-    position: fixed;
     width: 30%;
+    height: 400px;
+    overflow-y: scroll;
 }
 
 #title {
     text-align: center;
-    position: fixed;
-    padding:40px;
     width: 100%;
-    top: 0;
-    background-color: white;
-    z-index: 10;
 }
 
 #images-list {
-    margin-left:30%;
-    min-height:100%;  /* <-- fixes the background-color issue when content grows */
+    width: 70%;
 }
 
 #series-list h3 {
     font-size: 70%;
+    text-decoration: underline;
 }
 
 #series-list ul li{
