@@ -167,14 +167,16 @@ impl Handler<WriteCsv> for BackgroundActor {
 
 async fn index(state: web::Data<AppState>) -> Result<HttpResponse> {
     let series = state.series.lock().unwrap();
-    let infos = series
+    let mut infos = series
         .iter()
         .map(|(key, val)| SeriesInfo {
             name: key,
             number_of_observations: val.data.len(),
             last_modified: format!("{}", val.last_modification_time.format("%+")),
         })
-        .collect();
+        .into_iter()
+        .collect::<Vec<_>>();
+    infos.sort_by(|lhs, rhs| lhs.name.cmp(&rhs.name));
     let rendered = AvailableSeries { series: infos }.render().unwrap();
     Ok(HttpResponse::Ok().content_type("text/html").body(rendered))
 }
