@@ -1,0 +1,1 @@
+html,body{font-family:sans-serif}#page-wrapper{width:100%;display:flex}#series-list{width:30%;height:400px;overflow-y:scroll}#title{text-align:center;width:100%}#images-list{width:70%}#series-list h3{font-size:70%;text-decoration:underline}#series-list ul li{font-size:70%}#images-list ul{list-style-type:none}#images-list ul li div{display:none}
