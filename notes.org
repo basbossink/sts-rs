@@ -1,11 +1,51 @@
 #+title: Notes
 * Todos
-- [-] Perf-data-extractor [2/3]
+- [-] Perf-data-extractor [2/5]
   - [X] Add proper logging
   - [X] Take inspection and post url as parameters/environment variables
   - [ ] Add repeated execution for jitter robustness
-- [ ] Frontend [0/2]
-  - [ ] use seperate divs for description of metric and graph
-  - [ ] improve layout/styling
-- [ ] Backend [0/1]
+  - [ ] Add Time to first byte measurement
+  - [ ] Disable caching for measurement
+- [-] Frontend [2/5]
+  - [X] use seperate divs for description of metric and graph
+  - [X] improve layout/styling
+  - [ ] add semantic markup
+    - [[https://www.w3schools.com/html/html5_semantic_elements.asp][HTML5 semantic elements freecodecamp]]
+  - [ ] Add description to measurement
+  - [ ] Use css background images iso img tags
+    - [[https://developers.google.com/web/fundamentals/performance/lazy-loading-guidance/images-and-video][laze loading images]]
+    - [[https://developers.google.com/web/fundamentals/performance/lazy-loading-guidance/images-and-video][Lazy loading images the complete guide]]
+- [ ] Backend [0/11]
   - [ ] Add possibility to add description to metric
+  - [ ] Optimize svg images
+    - [[https://github.com/svg/svgo/blob/master/README.md][SVGO]]
+  - [ ] pre-gzip svg images
+    - [[https://sevenzip.osdn.jp/chm/cmdline/switches/method.htm#GZ][7za gzip commandline arguments]]
+    - [[https://users.rust-lang.org/t/how-to-serve-a-pre-compressed-data-with-actix-web/16822][How to serve a pre-compressed data with actix-web?]]
+  - [ ] add /environment/ concept
+  - [ ] add ~prequel.js~ support
+    - [[https://www.npmjs.com/package/eval][Eval nodejs package]]
+    - [[https://stackoverflow.com/questions/45778181/puppeteer-how-to-submit-a-form][puppeteer how to submit a form]]
+  - [ ] minify templates at build time
+    - [[https://taskfile.dev/#/][Task (go make replacement)]]
+    - [[https://github.com/tdewolff/minify][minify (go based minifier)]]
+  - [ ] Add description to measurement
+  - [ ] Add authentication
+    - [ ] add api-key
+  - [ ] Add overview/drilldown page
+  - [ ] Add support for combining multiple metrics in one graph
+  - [ ] Extend data format for errrorbars
+* Research topics
+- [ ] Rust cloud deployment
+  - [[https://www.digitalocean.com/products/linux-distribution/freebsd/][Digital ocean FreeBSD]]
+- [ ] actix-web letsencrypt
+  - [[https://letsencrypt.org/][Let's Encrypt]]
+  - [[https://certbot.eff.org/][Certbot]]
+  - [[https://man.openbsd.org/acme-client.1][OpenBSD Acme client]]
+  - [[https://github.com/breard-r/acmed][ACMEd (Rust acme daemon)]]
+  - [[https://docs.rs/signal-hook/0.1.12/signal_hook/][signal_hook cargo package]]
+  - [[https://rust-cli.github.io/book/in-depth/signals.html][Signal handling in Rust command line applications]]
+- [ ] Investigate YSlow comments
+- [ ] Investigate [[https://webpagetest.org/][Webpagetest]]
+- [ ] [[http://gnuplot.sourceforge.net/docs_4.2/node140.html][Gnuplot error bars]]
+- [ ] Outlier detection
