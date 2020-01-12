@@ -8,6 +8,7 @@ repository = "https://github.com/basbossink/sts-rs"
 keywords = ["time-series"]
 categories = ["visualization"]
 license = "BSD-2-Clause"
+build = "build.rs"
 
 [dependencies]
 actix = "0.9.0"
@@ -32,3 +33,4 @@ log = "0.4"
 
 [build-dependencies]
 askama = "0.8"
+vergen = "3"

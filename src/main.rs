@@ -24,6 +24,9 @@ use std::process::{Command, Output};
 use std::str;
 use std::sync::Mutex;
 
+const VERSION: &'static str = env!("VERGEN_SEMVER");
+const SHORT_SHA: &'static str = env!("VERGEN_SHA_SHORT");
+const BUILD_TIMESTAMP: &'static str = env!("VERGEN_BUILD_TIMESTAMP");
 const GNUPLOT_COMMANDS: &'static str = r#"set timefmt "%s";
 set format x "%Y/%m/%d %H:%M:%S";
 set xdata time;
@@ -309,6 +312,19 @@ fn read_csv_data(file_path: &Path) -> (Vec<Datum>, i64) {
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
+    let is_dirty: Option<&'static str> = option_env!("BUILD_GIT_WORKSPACE_IS_DIRTY");
+    let is_dirty_token = match is_dirty {
+        Some(v) if v.to_lowercase() == "false" => "",
+        _ => "*",
+    };
+    info!(
+        "Starting {} v{}, git commit sha: {}{}, built on {}",
+        env!("CARGO_PKG_NAME"),
+        VERSION,
+        SHORT_SHA,
+        is_dirty_token,
+        BUILD_TIMESTAMP
+    );
     let config_dir = data_dir_or_empty().join(".sts-rs");
     let data_output_path = PathBuf::from(env_or_default(
         "STS_RS_DATA_PATH",

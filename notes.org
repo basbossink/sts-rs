@@ -15,8 +15,12 @@
   - [ ] Use css background images iso img tags
     - [[https://developers.google.com/web/fundamentals/performance/lazy-loading-guidance/images-and-video][laze loading images]]
     - [[https://developers.google.com/web/fundamentals/performance/lazy-loading-guidance/images-and-video][Lazy loading images the complete guide]]
-- [ ] Backend [0/11]
+- [-] Backend [1/13]
   - [ ] Add possibility to add description to metric
+  - [ ] Add application version to Server header
+    - [[https://stackoverflow.com/questions/27840394/how-can-a-rust-program-access-metadata-from-its-cargo-package][Access Cargo metadata]]
+  - [X] Log application version git SHA at application startup
+    - [[https://doc.rust-lang.org/cargo/reference/build-scripts.html#case-study-code-generation][Cargo code generation documentation]]
   - [ ] Optimize svg images
     - [[https://github.com/svg/svgo/blob/master/README.md][SVGO]]
   - [ ] pre-gzip svg images
