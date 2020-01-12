@@ -6,15 +6,17 @@
   - [ ] Add repeated execution for jitter robustness
   - [ ] Add Time to first byte measurement
   - [ ] Disable caching for measurement
-- [-] Frontend [2/5]
+- [-] Frontend [3/7]
   - [X] use seperate divs for description of metric and graph
   - [X] improve layout/styling
   - [ ] add semantic markup
     - [[https://www.w3schools.com/html/html5_semantic_elements.asp][HTML5 semantic elements freecodecamp]]
   - [ ] Add description to measurement
-  - [ ] Use css background images iso img tags
+  - [X] Use css background images iso img tags
     - [[https://developers.google.com/web/fundamentals/performance/lazy-loading-guidance/images-and-video][laze loading images]]
     - [[https://developers.google.com/web/fundamentals/performance/lazy-loading-guidance/images-and-video][Lazy loading images the complete guide]]
+  - [ ] Use sass for css
+    - [[https://sass-lang.com/][Sass]]
 - [-] Backend [2/13]
   - [ ] Add possibility to add description to metric
   - [X] Add application version to Server header

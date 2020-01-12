@@ -6,7 +6,18 @@
     <link rel="icon" type="image/png" sizes="32x32" href="static/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="static/favicon-16x16.png">
     <link rel="manifest" href="static/site.webmanifest">
+    <style type="text/css">
+        {%- for serie in series -%}
+        {%- if loop.first -%}
+        #images-list ul li #{{serie.name}} {
+            background-image: url('images/{{serie.name}}.svg');
+            display: block;
+        }
+        {%- endif -%}
+        {%- endfor -%}
+    </style>
     <title>Performance graphs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta charset="utf-8" />
   </head>
   <body>
@@ -16,7 +27,7 @@
     <div id="page-wrapper">
       <div id="series-list">
         <ul>
-          {% for serie in series %}
+          {%- for serie in series -%}
           <li>
             <h3 onclick="showImage('{{serie.name}}')">{{ serie.name}}</h3>
             <ul>
@@ -24,27 +35,30 @@
               <li>Contains {{ serie.number_of_observations}} observations</li>
             </ul>
           </li>
-          {% endfor %}
+          {%- endfor -%}
         </ul>
       </div>
       <div id="images-list">
         <ul>
-          {% for serie in series %}
+          {%- for serie in series -%}
           <li>
-            <div class="graph" id="{{serie.name}}" {% if loop.first %} style="display: block;"{% endif %}><img src="images/{{serie.name}}.svg" /></div>
+            <div class="graph" id="{{serie.name}}"></div>
           </li>
-          {% endfor %}
+          {%- endfor -%}
         </ul>
         <script>
          function showImage(serieName) {
-           var graphs = document.getElementsByClassName("graph");
+           var graphs = document.getElementsByClassName('graph');
            for (let i=0; i< graphs.length; i++) {
-             console.log("serieName", serieName, "element", graphs[i]);
              let displayStyle = 'none';
+             let background = 'none';
              if(graphs[i].id === serieName) {
                displayStyle = 'block';
+               background = "url('images/" + serieName + ".svg')";
+             console.log('serieName', serieName, 'element', graphs[i], 'background', background);
              }
              graphs[i].style.display = displayStyle;
+             graphs[i].style.background = background;
            }
          }
         </script>

@@ -36,5 +36,9 @@ html, body {
 }
 
 #images-list ul li div {
+    width: 600px;
+    height: 480px;
+    margin: auto;
     display: none;
+    background: none;
 }
