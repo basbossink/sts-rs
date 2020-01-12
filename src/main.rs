@@ -208,8 +208,10 @@ async fn add_datum(
     let dt = Utc.timestamp(info.timeStamp, 0);
     let series_name = path.to_string();
     let mut w = state.series.lock().unwrap();
+    let now = Utc::now();
     let current_values = if let Some(series) = w.get_mut(&series_name) {
         series.data.push(info.0);
+        series.last_modification_time = now;
         series.data.to_vec()
     } else {
         let values = vec![info.0];
@@ -217,7 +219,7 @@ async fn add_datum(
             series_name.clone(),
             Series {
                 data: values.to_vec(),
-                last_modification_time: Utc::now(),
+                last_modification_time: now,
             },
         );
         values
