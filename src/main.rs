@@ -25,6 +25,7 @@ use std::str;
 use std::sync::Mutex;
 
 const VERSION: &'static str = env!("VERGEN_SEMVER");
+const PACKAGE_NAME: &'static str = env!("CARGO_PKG_NAME");
 const SHORT_SHA: &'static str = env!("VERGEN_SHA_SHORT");
 const BUILD_TIMESTAMP: &'static str = env!("VERGEN_BUILD_TIMESTAMP");
 const GNUPLOT_COMMANDS: &'static str = r#"set timefmt "%s";
@@ -319,11 +320,7 @@ async fn main() -> std::io::Result<()> {
     };
     info!(
         "Starting {} v{}, git commit sha: {}{}, built on {}",
-        env!("CARGO_PKG_NAME"),
-        VERSION,
-        SHORT_SHA,
-        is_dirty_token,
-        BUILD_TIMESTAMP
+        PACKAGE_NAME, VERSION, SHORT_SHA, is_dirty_token, BUILD_TIMESTAMP
     );
     let config_dir = data_dir_or_empty().join(".sts-rs");
     let data_output_path = PathBuf::from(env_or_default(
@@ -360,6 +357,10 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(middleware::Logger::default())
             .wrap(middleware::Compress::default())
+            .wrap(
+                middleware::DefaultHeaders::new()
+                    .header("Server", format!("{}/{}", PACKAGE_NAME, VERSION)),
+            )
             .service(fs::Files::new(
                 "/images",
                 image_output_path.to_str().unwrap(),
