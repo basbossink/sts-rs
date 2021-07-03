@@ -29,7 +29,7 @@ function isValidUrl(candidateUrl) {
  */
 
 /**
- * This function gather the raw performance metrics from
+ * This function gathers the raw performance metrics from
  * a single navigation to a single url.
  *
  * @param {browser} browser - A puppeteer browser instance.
