@@ -1,0 +1,9 @@
+concurrency: 4
+base: 'https://localhost:8443'
+iterations: 100
+rampup: 2
+
+plan:
+    - name: Fetch index
+      request:
+          url: /
