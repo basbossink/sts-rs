@@ -17,7 +17,7 @@ actix-web = { version = "2.0", features = ["openssl"] }
 openssl = { version = "0.10", features = ["v110"] }
 actix-files = "0.2.1"
 actix-session = "0.3.0"
-actix-utils = "1.0.3"
+actix-utils = "2.0.0"
 futures = "0.3.1"
 bytes = "0.5"
 serde = "1.0"
