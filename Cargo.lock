@@ -1828,7 +1828,7 @@ dependencies = [
  "actix-files",
  "actix-rt",
  "actix-session",
- "actix-utils 1.0.6",
+ "actix-utils 2.0.0",
  "actix-web",
  "askama",
  "bytes 0.5.6",
